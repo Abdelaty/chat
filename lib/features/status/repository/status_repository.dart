@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
@@ -18,7 +19,6 @@ import 'package:whatsup/common/util/ext.dart';
 import 'package:whatsup/common/util/logger.dart';
 import 'package:whatsup/common/util/misc.dart';
 import 'package:whatsup/features/contact/repository/contact.dart';
-import 'package:async/async.dart';
 
 final statusRepositoryProvider = Provider((ref) {
   return StatusRepository(
@@ -32,7 +32,8 @@ class StatusRepository {
   final UserRepository _db;
   final AuthRepository _auth;
   final Ref _ref;
-  static final Logger _logger = AppLogger.getLogger((StatusRepository).toString());
+  static final Logger _logger =
+      AppLogger.getLogger((StatusRepository).toString());
 
   const StatusRepository({
     required UserRepository db,
@@ -86,10 +87,12 @@ class StatusRepository {
       final List<String> whitelist = [];
       for (Contact entry in contacts) {
         // had to do it this way due to ios returning empty normalized number
-        final phone = removePhoneDecoration((entry.phones[0].normalizedNumber.isEmpty
-            ? entry.phones[0].number
-            : entry.phones[0].normalizedNumber));
-        final userModel = await _db.users.where(kPhoneNumberField, isEqualTo: phone).get();
+        final phone = removePhoneDecoration(
+            (entry.phones[0].normalizedNumber.isEmpty
+                ? entry.phones[0].number
+                : entry.phones[0].normalizedNumber));
+        final userModel =
+            await _db.users.where(kPhoneNumberField, isEqualTo: phone).get();
         if (userModel.docs.isNotEmpty) {
           final UserModel model = userModel.docs[0].data();
           whitelist.add(model.uid);
@@ -143,26 +146,36 @@ class StatusRepository {
     try {
       _logger.d("Attempting to upload file status");
       final statusId = const Uuid().v4();
-      final String activeUser = _auth.currentUser.unwrap().uid;
+      _logger.d("Attempting to upload file status statusId$statusId");
+
+      final String? activeUser = _auth.currentUser?.unwrap().uid;
+      _logger.d("Attempting to upload file status activeUser$activeUser");
+      _logger.d("Attempting to upload file status statusImage$statusImage");
+
       final String url = await _ref.read(storageRepositoryProvider).uploadFile(
             path: '/status/$statusId$activeUser',
             file: statusImage,
           );
+      _logger.d("Attempting to upload file status url$url");
+
       final contacts = await _ref.read(contactRepositoryProvider).getAll();
+      _logger.d("Attempting to upload file status contacts$contacts");
 
       final List<String> whitelist = [];
       for (Contact entry in contacts) {
         // Check if the contact is registered on the app
-        final phone = removePhoneDecoration((entry.phones[0].normalizedNumber.isEmpty
-            ? entry.phones[0].number
-            : entry.phones[0].normalizedNumber));
-        final userModel = await _db.users.where(kPhoneNumberField, isEqualTo: phone).get();
+        final phone = removePhoneDecoration(
+            (entry.phones[0].normalizedNumber.isEmpty
+                ? entry.phones[0].number
+                : entry.phones[0].normalizedNumber));
+        final userModel =
+            await _db.users.where(kPhoneNumberField, isEqualTo: phone).get();
         if (userModel.docs.isNotEmpty) {
           final UserModel model = userModel.docs[0].data();
           whitelist.add(model.uid);
         }
 
-        final existingStatuses = await _db.userStatuses(activeUser).get();
+        final existingStatuses = await _db.userStatuses(activeUser!).get();
 
         if (existingStatuses.docs.isNotEmpty) {
           // We have an existing status
@@ -176,7 +189,7 @@ class StatusRepository {
       }
 
       final status = StatusModel(
-        uid: activeUser,
+        uid: activeUser!,
         username: username,
         phoneNumber: phoneNumber,
         photoUrl: [url],
@@ -190,7 +203,9 @@ class StatusRepository {
       );
 
       await _db.statuses.doc(statusId).set(status);
-    } catch (e) {
+    } catch (e, t) {
+      debugPrint('error' + e.toString());
+      debugPrint('error trace' + t.toString());
       _logger.e(e);
       onError();
     }
@@ -220,8 +235,10 @@ class StatusRepository {
     final List<Stream<List<StatusModel>>> statuses = [];
 
     for (String contactPhone in whitelist) {
-      final Stream<List<StatusModel>> contactStatus =
-          _db.statuses.where(kPhoneNumberField, isEqualTo: contactPhone).snapshots().map((query) {
+      final Stream<List<StatusModel>> contactStatus = _db.statuses
+          .where(kPhoneNumberField, isEqualTo: contactPhone)
+          .snapshots()
+          .map((query) {
         return query.docs
             .map((status) => status.data())
             .filter((t) => t.whitelist.contains(_auth.currentUser.unwrap().uid))
@@ -243,10 +260,12 @@ class StatusRepository {
       final contacts = await _ref.read(contactRepositoryProvider).getAll();
       for (Contact entry in contacts) {
         final phone = entry.phones[0].normalizedNumber;
-        final statuses = await _db.statuses.where(kPhoneNumberField, isEqualTo: phone).get();
+        final statuses =
+            await _db.statuses.where(kPhoneNumberField, isEqualTo: phone).get();
         final availableStatuses = statuses.docs
             .map((query) => query.data())
-            .filter((status) => status.whitelist.contains(_auth.currentUser.unwrap().uid));
+            .filter((status) =>
+                status.whitelist.contains(_auth.currentUser.unwrap().uid));
         status.addAll(availableStatuses);
       }
     } catch (e, stack) {

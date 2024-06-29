@@ -1,16 +1,17 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 import 'package:whatsup/common/theme.dart';
 import 'package:whatsup/common/util/constants.dart';
 import 'package:whatsup/common/util/logger.dart';
 import 'package:whatsup/config.dart';
 import 'package:whatsup/features/call/service/call_invitation.dart';
-import 'package:whatsup/router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 import 'package:whatsup/features/startup/pages/startup.dart';
+import 'package:whatsup/router.dart';
 
 import 'common/util/run_mode.dart';
 
@@ -20,10 +21,9 @@ void main() async {
   logger.i("Initializing app in ${RunModeExtension.currentMode.name} mode");
   await dotenv.load(fileName: '.env');
   final navigatorKey = GlobalKey<NavigatorState>();
-
+  WidgetsFlutterBinding.ensureInitialized();
   CallInvitationService.attachNavigatorKey(navigatorKey);
   CallInvitationService.useSysCallUI();
-  WidgetsFlutterBinding.ensureInitialized();
 
   if (RunModeExtension.currentMode.isDebug) {
     // https://github.com/flutter/flutter/issues/10713
@@ -35,6 +35,8 @@ void main() async {
     name: dotenv.get("FIREBASE_PROJECT_ID"),
     options: AppConfig.firebaseSettings,
   );
+  await FirebaseAppCheck.instance.activate();
+  logger.e('errrror${dotenv.get("FIREBASE_PROJECT_ID")}');
 
   runApp(
     ProviderScope(
@@ -61,7 +63,8 @@ class App extends ConsumerWidget {
       title: kAppName,
       theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: themeNotifier == Brightness.light ? ThemeMode.light : ThemeMode.dark,
+      themeMode:
+          themeNotifier == Brightness.light ? ThemeMode.light : ThemeMode.dark,
       onGenerateRoute: PageRouter.generateRoutes,
       home: const StartUp(),
     );

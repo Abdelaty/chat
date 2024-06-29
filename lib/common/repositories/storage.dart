@@ -19,8 +19,28 @@ class StorageRepository {
     required String path,
     required File file,
   }) async {
-    final snapshot = await _storage.ref().child(path).putFile(file);
-    final url = await snapshot.ref.getDownloadURL();
-    return url;
+    try {
+      // Check if the file exists
+      if (!file.existsSync()) {
+        throw Exception('File does not exist');
+      }
+
+      // Log the file path and file information
+      print('Uploading file: ${file.path}');
+
+      // Attempt to upload the file
+      final snapshot = await _storage.ref().child(path).putFile(file);
+      print('Uploading filesnapshot: ${snapshot.state.toString()}');
+      final url = await snapshot.ref.getDownloadURL();
+
+      // Log the URL
+      print('File uploaded successfully. URL: $url');
+
+      return url;
+    } catch (e, t) {
+      // Log the error
+      print('Error uploading file: $e $t');
+      throw ('error$e');
+    }
   }
 }

@@ -2,22 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>743457869400-149i42elp8c6srup5r2k70g4j4436fhu.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.743457869400-149i42elp8c6srup5r2k70g4j4436fhu</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDSAKzaWB0v8sgUeme6ziA_hWIp-QvV--U</string>
+	<string>AIzaSyALl-L3kYmVamX_MzKjJ_KvcCe34a-ocbo</string>
 	<key>GCM_SENDER_ID</key>
-	<string>743457869400</string>
+	<string>633093689290</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.whatsup.whatsUp.RunnerTests</string>
+	<string>com.whatsup.chat</string>
 	<key>PROJECT_ID</key>
-	<string>whatsapp-clone-eb023</string>
+	<string>chat-bd03f</string>
 	<key>STORAGE_BUCKET</key>
-	<string>whatsapp-clone-eb023.appspot.com</string>
+	<string>gs://chat-bd03f.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +25,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:743457869400:ios:338a331714f3829202842d</string>
+	<string>1:633093689290:ios:3171de330c609d224ac933</string>
+	<key>DATABASE_URL</key>
+	<string>https://chat-bd03f-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
-import 'package:whatsup/common/models/user.dart';
-import 'package:whatsup/common/providers.dart';
-import 'package:whatsup/common/util/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:logger/logger.dart';
+import 'package:whatsup/common/models/user.dart';
+import 'package:whatsup/common/providers.dart';
+import 'package:whatsup/common/util/logger.dart';
 
 final authRepositoryProvider = Provider((ref) {
   return AuthRepository(auth: ref.watch(authProvider));
@@ -57,6 +57,7 @@ class AuthRepository {
         },
         verificationFailed: (err) {
           onError(_getOtpErrorMsg(err.code));
+          debugPrint('errror' + err.message.toString());
         },
         codeSent: (id, resendToken) async {
           onCodeSent(id);
@@ -66,6 +67,7 @@ class AuthRepository {
     } on FirebaseAuthException catch (e) {
       onError(_getOtpErrorMsg(e.code));
     } catch (e) {
+      debugPrint('eee' + e.toString());
       logger.e(e.toString());
       onError(_getOtpErrorMsg(e.toString()));
     }
@@ -87,17 +89,21 @@ class AuthRepository {
       logger.i("OTP verified successfully. You are now logged in");
       onSuccess();
     } on FirebaseAuthException catch (e) {
-      onError(_getOtpErrorMsg(e.code));
-    } catch (e) {
+      debugPrint('zekoo' + e.toString());
+      debugPrint('zekoo1' + e.message.toString());
+      // onError(_getOtpErrorMsg(e.code));
+    } catch (e, t) {
       logger.e(e.toString());
-
-      onError(_getOtpErrorMsg(e.toString()));
+      debugPrint('zekoo' + e.toString());
+      debugPrint('zekoo1' + t.toString());
+      // onError(_getOtpErrorMsg(e.toString()));
     }
   }
 
   String _getOtpErrorMsg(String code) {
     String message = "Something went very wrong";
-    logger.e("Error code: $code");
+    // debugPrint('errrrror'+)
+    logger.e("Error code11: $code");
     switch (code) {
       case "account-exists-with-different-credential":
         message = "There is already an account with this phone number";
@@ -106,7 +112,8 @@ class AuthRepository {
         message = "Phone auth is not enabled";
         break;
       case "invalid-verification-code":
-        message = "Failed to verify phone number. Please check the code you entered and try again";
+        message =
+            "Failed to verify phone number. Please check the code you entered and try again";
         break;
       default:
         message = "Failed to verify phone number. Please try again";
